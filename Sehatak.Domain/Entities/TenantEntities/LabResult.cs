@@ -7,11 +7,8 @@ namespace Sehatak.Domain.Entities.TenantEntities
     {
         [Key]
         public int Id { get; set; }
-
         public int PatientId { get; set; }
-
         public int TechnicianId { get; set; }
-
         public string? ResultFileUrl { get; set; }
         public int? LabRequestId { get; set; }
         public string? AiSummary { get; set; }

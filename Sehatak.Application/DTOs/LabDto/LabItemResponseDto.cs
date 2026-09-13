@@ -6,7 +6,7 @@ namespace Sehatak.Application.DTOs.LabDto
     {
         public int ServicePriceId { get; set; }
         public string ServiceName { get; set; }
-        public int LabRequestId { get; set; }
+        public int ItemId { get; set; }
         public decimal UnitPrice { get; set; }
     }
 }

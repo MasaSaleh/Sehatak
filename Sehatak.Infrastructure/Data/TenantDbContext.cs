@@ -611,6 +611,11 @@ namespace Sehatak.Infrastructure.Data
                 entity.HasOne(e => e.Doctor)
                       .WithMany()
                       .HasForeignKey(e => e.DoctorId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.RequestedByUser)
+                      .WithMany()
+                      .HasForeignKey(e => e.RequestedByUserId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.Patient)
@@ -638,7 +643,17 @@ namespace Sehatak.Infrastructure.Data
                       .WithMany()
                       .HasForeignKey(e => e.ServicePriceId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.UnitPrice)
+                        .HasPrecision(10, 2);
+
+                entity.Property(e => e.ResultValue)
+                      .HasPrecision(10, 3);     
+
+                entity.Property(e => e.ResultFileUrl)
+                      .HasMaxLength(255);
             });
+
             // Email Verification Code
             modelBuilder.Entity<EmailVerificationCode>(e =>
             {

@@ -74,6 +74,7 @@ namespace Sehatak.Infrastructure.Services.PatientService.PatientRegisterAuth;
             throw new BusinessException("Center.NotFound");
 
         var db = tenantFactory.CreateForCenter(centerId);
+
         var existing = await db.Users.FirstOrDefaultAsync(u => u.email == request.email);
 
         if (existing != null && existing.isActive)

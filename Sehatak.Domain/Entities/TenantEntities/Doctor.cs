@@ -25,6 +25,5 @@ namespace Sehatak.Domain.Entities.TenantEntities
         public ICollection<Consultation> Consultations { get; set; } = new List<Consultation>();
         public ServicePrice? ConsultationCost { get; set; }
 
-
     }
 }

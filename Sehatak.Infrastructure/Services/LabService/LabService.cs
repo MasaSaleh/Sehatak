@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office2016.Excel;
+using DocumentFormat.OpenXml.Office2021.Excel.RichDataWebImage;
+using Microsoft.EntityFrameworkCore;
 using Sehatak.Application.Common;
 using Sehatak.Application.DTOs.Exceptions;
 using Sehatak.Application.DTOs.LabDto;
@@ -7,6 +9,7 @@ using Sehatak.Domain.Entities.TenantEntities;
 using Sehatak.Domain.Enums;
 using Sehatak.Domain.Enums.SharedEnums;
 using Sehatak.Infrastructure.Data;
+using System.Numerics;
 
 namespace Sehatak.Infrastructure.Services.LabService
 {
@@ -18,6 +21,39 @@ namespace Sehatak.Infrastructure.Services.LabService
         {
             this.sharedDbContext = sharedDbContext;
             this.contextFactory = contextFactory;
+        }
+
+        public async Task<string> CancleLabReqquestAsync(int centerId, int userId, int labRequestId)
+        {
+            var center = await sharedDbContext.MedicalCenters
+                .FirstOrDefaultAsync(c => c.Id == centerId
+                                     && c.CenterStatus == CenterStatus.Active);
+
+            if (center == null)
+                throw new BusinessException("Center.NotFound");
+
+            using var db = contextFactory.CreateForCenter(centerId);
+
+            var user = await db.Users
+                .FirstOrDefaultAsync(u => u.Id == userId
+                                     && u.isActive);
+
+            if (user == null)
+                throw new BusinessException("User.NotFound");
+
+            var labRequest = await db.LabRequests
+                .FirstOrDefaultAsync(l => l.Id == labRequestId
+                                     && l.RequestedByUserId == userId
+                                     && (l.Status != LabRequestStatus.Collected
+                                     && l.Status != LabRequestStatus.Completed));
+
+            if (labRequest == null)
+                throw new BusinessException("LabRequest.NotFound");
+
+            labRequest.Status = LabRequestStatus.Cancelled;
+            labRequest.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+            return "تم الغاء الطلب بنجاح.";
         }
 
         public async Task<LabRequestResponseDto> CreateLabRequestAsync(int centerId, int userId, CreateLabRequestDto request)
@@ -68,6 +104,9 @@ namespace Sehatak.Infrastructure.Services.LabService
                 RequstedAt = DateTime.UtcNow,
                 Notes = request.Note,
                 Status = LabRequestStatus.Pending,
+                RequestedByUserId = userId,
+                UpdatedAt = DateTime.UtcNow
+
             };
 
             await db.LabRequests.AddAsync(labRequest);
@@ -102,6 +141,7 @@ namespace Sehatak.Infrastructure.Services.LabService
                         ServicePriceId = servicePrice.Id,
                         ServiceName = servicePrice.ServiceName,
                         UnitPrice = servicePrice.Price,
+                        ItemId = item.Id
                     });
                 }
             }
@@ -122,7 +162,7 @@ namespace Sehatak.Infrastructure.Services.LabService
                 TotalPrice = grandTotal,
                 LabStatus = labRequest.Status.ToString(),
                 Note = labRequest.Notes,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = labRequest.UpdatedAt
             };
         }
 
@@ -161,19 +201,20 @@ namespace Sehatak.Infrastructure.Services.LabService
                 .Select(n => new LabRequestResponseDto
                 {
                     LabRequestId = n.Id,
-                    AppointmentId = (int)n.AppointmentId,
+                    AppointmentId = n.AppointmentId,
                     PatientId = n.PatientId,
                     PatientName = patientExists.userId != null
                     ? patientExists.user.firstName + " " + patientExists.user.lastName
                     : patientExists.FirstName + " " + patientExists.LastName,
                     CreatedAt = n.RequstedAt,
+                    UpdatedAt = n.UpdatedAt,
                     LabStatus = n.Status.ToString(),
                     Note = n.Notes,
                     LabItems = n.Items.Select(i => new LabItemResponseDto
                     {
                         ServicePriceId = i.ServicePriceId,
                         ServiceName = i.ServicePrice.ServiceName,
-                        LabRequestId = i.LabRequestId,
+                        ItemId = i.Id,
                         UnitPrice = i.UnitPrice
                     }).ToList(),
                     TotalPrice = n.Items.Sum(i => i.UnitPrice)
@@ -223,13 +264,14 @@ namespace Sehatak.Infrastructure.Services.LabService
                 {
                     LabRequestId = n.Id,
                     CreatedAt = n.RequstedAt,
+                    UpdatedAt = n.UpdatedAt,
                     LabStatus = n.Status.ToString(),
                     Note = n.Notes,
                     LabItems = n.Items.Select(i => new LabItemResponseDto
                     {
                         ServicePriceId = i.ServicePriceId,
                         ServiceName = i.ServicePrice.ServiceName,
-                        LabRequestId = i.LabRequestId,
+                        ItemId = i.Id,
                         UnitPrice = i.UnitPrice
                     }).ToList(),
                     TotalPrice = n.Items.Sum(i => i.UnitPrice)
@@ -238,6 +280,218 @@ namespace Sehatak.Infrastructure.Services.LabService
             return await query.ToPagedResultAsync(request.PageNumber, request.PageSize);
         }
 
+        public async Task<ReceptionistLabRequestReponseDto> ReceptionistCreateLabRequestAsync(int centerId, int userId, ReceptionistCreateLabRequestDto request)
+        {
+            var center = await sharedDbContext.MedicalCenters
+                .FirstOrDefaultAsync(c => c.Id == centerId
+                                     && c.CenterStatus == CenterStatus.Active);
+
+            if (center == null)
+                throw new BusinessException("Center.NotFound");
+
+            using var db = contextFactory.CreateForCenter(centerId);
+
+            var Receptionist = await db.Users
+                .FirstOrDefaultAsync(u => u.Id == userId
+                                     && u.isActive);
+
+            if (Receptionist == null)
+                throw new BusinessException("Receptionist.NotFound");
+
+            var patientExists = await db.Patients
+              .Include(u => u.user)
+              .FirstOrDefaultAsync(p => p.patientId == request.PatientId);
+
+            if (patientExists == null)
+                throw new BusinessException("Patient.NotFound");
+
+            if (patientExists.userId != null && patientExists.user.isActive == false)
+                throw new BusinessException("Patient.NotFound");
+
+            var labRequest = new LabRequest
+            {
+                PatientId = patientExists.patientId,
+                RequstedAt = DateTime.UtcNow,
+                Notes = request.Note,
+                Status = LabRequestStatus.Pending,
+                RequestedByUserId = userId,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await db.LabRequests.AddAsync(labRequest);
+
+            var responseItems = new List<LabItemResponseDto>();
+            if (request.LabItems != null)
+            {
+                var seenIds = new HashSet<int>();
+                foreach (var Item in request.LabItems)
+                {
+                    if (!seenIds.Add(Item.Id))
+                        throw new BusinessException("LabRequest.DuplicateItem");
+
+                    var servicePrice = await db.ServicePrices
+                        .FirstOrDefaultAsync(s => s.Id == Item.Id
+                                             && s.Type == ServiceType.LabTest
+                                             && s.IsActive);
+
+                    if (servicePrice == null)
+                        throw new BusinessException("ServicePrice.NotFound");
+
+                    var item = new LabRequestItem
+                    {
+                        ServicePriceId = Item.Id,
+                        LabRequest = labRequest,
+                        UnitPrice = servicePrice.Price,
+                    };
+                    await db.LabRequestItems.AddAsync(item);
+
+                    responseItems.Add(new LabItemResponseDto
+                    {
+                        ServicePriceId = servicePrice.Id,
+                        ServiceName = servicePrice.ServiceName,
+                        UnitPrice = servicePrice.Price,
+                        ItemId = item.Id
+                    });
+                }
+            }
+
+            await db.SaveChangesAsync();
+            var grandTotal = responseItems.Sum(i => i.UnitPrice);
+
+            return new ReceptionistLabRequestReponseDto
+            {
+                LabRequestId = labRequest.Id,
+                PatientId = patientExists.patientId,
+                PatientName = patientExists.userId != null
+                ? patientExists.user.firstName + " " + patientExists.user.lastName
+                : patientExists.FirstName + " " + patientExists.LastName,
+                CreatedAt = labRequest.RequstedAt,
+                LabItems = responseItems,
+                TotalPrice = grandTotal,
+                LabStatus = labRequest.Status.ToString(),
+                Note = labRequest.Notes,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
+
+        public async Task<ReceptionistLabRequestReponseDto> ReceptionistUpdateLabRequestAsync(int centerId, int userId, ReceptionistUpdateLabRequestDto request)
+        {
+            var center = await sharedDbContext.MedicalCenters
+                .FirstOrDefaultAsync(c => c.Id == centerId
+                                     && c.CenterStatus == CenterStatus.Active);
+
+            if (center == null)
+                throw new BusinessException("Center.NotFound");
+
+            using var db = contextFactory.CreateForCenter(centerId);
+
+            var Receptionist = await db.Users
+                .FirstOrDefaultAsync(d => d.Id == userId
+                                     && d.isActive);
+
+            if (Receptionist == null)
+                throw new BusinessException("Receptionist.NotFound");
+
+            var patientExists = await db.Patients
+               .Include(u => u.user)
+               .FirstOrDefaultAsync(p => p.patientId == request.PatientId);
+
+            if (patientExists == null)
+                throw new BusinessException("Patient.NotFound");
+
+            if (patientExists.userId != null && patientExists.user.isActive == false)
+                throw new BusinessException("Patient.NotFound");
+
+            var labRequest = await db.LabRequests
+                .FirstOrDefaultAsync(l => l.Id == request.LabRequestId
+                                     && l.PatientId == request.PatientId
+                                     && l.Status == LabRequestStatus.Pending);
+
+            if (labRequest == null)
+                throw new BusinessException("LabRequest.NotFound");
+
+            if (request.Note != null)
+                labRequest.Notes = request.Note;
+
+            var LabItems = await db.LabRequestItems
+                .Where(l => l.LabRequestId == request.LabRequestId)
+                .ToListAsync();
+
+            if (request.RemoveLabItems != null && LabItems != null)
+            {
+                foreach (var itemId in request.RemoveLabItems)
+                {
+                    var removeItem = LabItems.FirstOrDefault(l => l.Id == itemId);
+                    if (removeItem != null)
+                    {
+                        db.LabRequestItems.Remove(removeItem);
+                    }
+                }
+            }
+
+            if (request.AddLabItems != null)
+            {
+                var existingIds = LabItems
+                        .Where(l => request.RemoveLabItems == null
+                               || !request.RemoveLabItems.Contains(l.Id))
+                        .Select(l => l.ServicePriceId)
+                        .ToHashSet();
+
+                foreach (var Item in request.AddLabItems)
+                {
+                    if (!existingIds.Add(Item.Id))
+                        throw new BusinessException("LabRequest.DuplicateItem");
+
+                    var servicePrice = await db.ServicePrices
+                        .FirstOrDefaultAsync(s => s.Id == Item.Id
+                                             && s.Type == ServiceType.LabTest
+                                             && s.IsActive);
+
+                    if (servicePrice == null)
+                        throw new BusinessException("ServicePrice.NotFound");
+
+                    var item = new LabRequestItem
+                    {
+                        ServicePriceId = Item.Id,
+                        LabRequestId = labRequest.Id,
+                        UnitPrice = servicePrice.Price,
+                    };
+                    await db.LabRequestItems.AddAsync(item);
+                }
+            }
+            labRequest.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+
+            var currentItems = await db.LabRequestItems
+                .Include(i => i.ServicePrice)
+                .Where(i => i.LabRequestId == labRequest.Id)
+                .Select(i => new LabItemResponseDto
+                {
+                    ServicePriceId = i.ServicePriceId,
+                    ServiceName = i.ServicePrice.ServiceName,
+                    ItemId = i.Id,
+                    UnitPrice = i.UnitPrice
+                })
+                .ToListAsync();
+
+            var grandTotal = currentItems.Sum(i => i.UnitPrice);
+
+            return new ReceptionistLabRequestReponseDto
+            {
+                LabRequestId = labRequest.Id,
+                PatientId = request.PatientId,
+                PatientName = patientExists.userId != null
+                ? patientExists.user.firstName + " " + patientExists.user.lastName
+                : patientExists.FirstName + " " + patientExists.LastName,
+                CreatedAt = labRequest.RequstedAt,
+                LabStatus = labRequest.Status.ToString(),
+                LabItems = currentItems,
+                TotalPrice = grandTotal,
+                Note = labRequest.Notes,
+                UpdatedAt = labRequest.UpdatedAt
+            };
+        
+        }
 
         public async Task<LabRequestResponseDto> UpdateLabRequestAsync(int centerId, int userId, UpdateLabRequestDto request)
         {
@@ -336,7 +590,7 @@ namespace Sehatak.Infrastructure.Services.LabService
                     await db.LabRequestItems.AddAsync(item);
                 }
             }
-
+            labRequest.UpdatedAt = DateTime.UtcNow;
             await db.SaveChangesAsync();
 
             var currentItems = await db.LabRequestItems
@@ -346,7 +600,7 @@ namespace Sehatak.Infrastructure.Services.LabService
                 {
                     ServicePriceId = i.ServicePriceId,
                     ServiceName = i.ServicePrice.ServiceName,
-                    LabRequestId = i.LabRequestId,
+                    ItemId = i.Id,
                     UnitPrice = i.UnitPrice
                 })
                 .ToListAsync();
@@ -366,7 +620,7 @@ namespace Sehatak.Infrastructure.Services.LabService
                 LabItems = currentItems,
                 TotalPrice = grandTotal,
                 Note = labRequest.Notes,   
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = labRequest.UpdatedAt
             };
         }
     }

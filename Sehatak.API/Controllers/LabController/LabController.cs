@@ -36,19 +36,46 @@ namespace Sehatak.API.Controllers.LabController
 
         [Authorize(Policy = "DoctorOnly")]
         [HttpGet("doctor-get-patient-lab-requests/{centerId}")]
-        public async Task<IActionResult> DoctorGetLabRequestsAsync(int centerId,int patientId, [FromQuery] PagedRequest request)
+        public async Task<IActionResult> DoctorGetLabRequestsAsync(int centerId, int patientId, [FromQuery] PagedRequest request)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-            var result = await lab.GetLabRequestForPatientAsync(centerId, userId,patientId, request);
+            var result = await lab.GetLabRequestForPatientAsync(centerId, userId, patientId, request);
             return Ok(result);
         }
 
         [Authorize(Policy = "PatientOnly")]
-        [HttpGet("patient-get-patient-lab-requests/{centerId}")]
-        public async Task<IActionResult> PatientGetLabRequestsAsync(int centerId,[FromQuery] PagedRequest request, [FromQuery] int?subPatientId)
+        [HttpGet("patient-get-lab-requests/{centerId}")]
+        public async Task<IActionResult> PatientGetLabRequestsAsync(int centerId, [FromQuery] PagedRequest request, [FromQuery] int? subPatientId)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-            var result = await lab.PatientGetLabRequestAsync(centerId, userId, request,subPatientId);
+            var result = await lab.PatientGetLabRequestAsync(centerId, userId, request, subPatientId);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "ReceptionistOnly")]
+        [HttpPost("receptionist-create-patient-lab-requests/{centerId}")]
+        public async Task<IActionResult> ReceptionistCreateLabRequestsAsync(int centerId, [FromBody] ReceptionistCreateLabRequestDto request)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.ReceptionistCreateLabRequestAsync(centerId, userId, request);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "ReceptionistOnly")]
+        [HttpPut("receptionist-update-lab-requests/{centerId}")]
+        public async Task<IActionResult> ReceptionistUpdateLabRequestsAsync(int centerId, [FromBody] ReceptionistUpdateLabRequestDto request)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.ReceptionistUpdateLabRequestAsync(centerId, userId, request);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "LabRequest")]
+        [HttpPut("receptionist-or-doctor-cancle-lab-requests/{centerId}/{labRequestId}")]
+        public async Task<IActionResult> CancleLabRequestsAsync(int centerId,int labRequestId)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.CancleLabReqquestAsync(centerId, userId, labRequestId);
             return Ok(result);
         }
 
