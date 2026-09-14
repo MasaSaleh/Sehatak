@@ -53,5 +53,14 @@ namespace Sehatak.API.Controllers.MedicalRecordController
             var result = await medical.GetMedicalRecordByIdAsync(centerId, userId, medicalRecordId);
             return Ok(result);
         }
+
+        [Authorize(Policy = "PatientOnly")]
+        [HttpGet("patient-get-medical-history/{centerId}")]
+        public async Task<IActionResult> GetPatientMedicalHistory(int centerId,[FromQuery] PagedRequest request,int?subPatientId)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var result = await medical.PatientgetMedicalRecordHistoryAsync(centerId, userId,request,subPatientId);
+            return Ok(result);
+        }
     }
 }

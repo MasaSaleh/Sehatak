@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office2010.PowerPoint;
+using Microsoft.EntityFrameworkCore;
 using Sehatak.Application.Common;
 using Sehatak.Application.DTOs.Exceptions;
 using Sehatak.Application.DTOs.MedicalRecordDto;
@@ -228,7 +229,7 @@ namespace Sehatak.Infrastructure.Services.MedicalRecordService
                 .FirstOrDefaultAsync(c => c.Id == centerId
                                      && c.CenterStatus == CenterStatus.Active);
 
-            if (center == null)
+            if (center == null) 
                 throw new BusinessException("Center.NotFound");
 
             using var db = contextFactory.CreateForCenter(centerId);
@@ -525,6 +526,55 @@ namespace Sehatak.Infrastructure.Services.MedicalRecordService
                 CreatedAt = record.CreatedAt,
                 UpdateAt = record.UpdatedAt,
             };
+        }
+
+        public async Task<Application.Common.PagedResult<PatientGetMedicalHistoryResponseDto>> PatientgetMedicalRecordHistoryAsync(int centerId, int userId, PagedRequest request, int? subPatientId)
+        {
+            var center = await sharedDbContext.MedicalCenters
+                .FirstOrDefaultAsync(c => c.Id == centerId && c.CenterStatus == CenterStatus.Active);
+            if (center == null)
+                throw new BusinessException("Center.NotFound");
+
+            using var db = contextFactory.CreateForCenter(centerId);
+
+            var patient = await db.Patients
+                .Include(u=>u.user)
+                .FirstOrDefaultAsync(p => p.userId == userId
+                                     && p.user.isActive);
+
+            if (patient == null)
+                throw new BusinessException("PatientNotFound");
+            Patient actingPatient = patient;
+
+            if (subPatientId.HasValue)
+            {
+                var subPatient = await db.Patients
+                    .FirstOrDefaultAsync(s => s.ParentPatientId == actingPatient.patientId
+                                        && s.patientId == subPatientId);
+
+                if (subPatient == null)
+                    throw new BusinessException("SubPatient.NotFound");
+
+                actingPatient = subPatient;
+            }
+
+            var query =  db.MedicalRecords
+                .Include(p => p.Patient)
+                .Where(m => m.PatientId == actingPatient.patientId)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(n => new PatientGetMedicalHistoryResponseDto
+                {
+                    medicalRecordId = n.Id,
+                    DoctorId = n.DoctorId,
+                    DoctorName = $"{n.Doctor.user.firstName} {n.Doctor.user.lastName}",
+                    Prescription = n.Prescription,
+                    Diagnosis = n.Diagnosis,
+                    Notes = n.Notes,
+                    CreatedAt = n.CreatedAt,
+                    UpdateAt = n.UpdatedAt
+                });
+
+            return await query.ToPagedResultAsync(request.PageNumber, request.PageSize);
         }
     }
 
