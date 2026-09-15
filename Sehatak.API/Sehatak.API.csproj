@@ -6,6 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\uploads\labResult\.gitKeep" />
+  </ItemGroup>
+
   
 
   <ItemGroup>
@@ -29,6 +33,10 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\uploads\labResult\.gitKeep" />
   </ItemGroup>
 
 </Project>

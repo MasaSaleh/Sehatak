@@ -79,5 +79,32 @@ namespace Sehatak.API.Controllers.LabController
             return Ok(result);
         }
 
+        [Authorize(Policy = "TechnicianOnly")]
+        [HttpGet("technician-get-lab-pending-requests/{centerId}")]
+        public async Task<IActionResult> TechnicianGetLabRequestsAsync(int centerId , [FromQuery] PagedRequest request)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.LabGetPendingRequestsAsync(centerId,userId,request);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "TechnicianOnly")]
+        [HttpGet("technician-get-lab-request/{centerId}/{labRequestId}")]
+        public async Task<IActionResult> TechnicianGetLabRequestAsync(int centerId, int labRequestId)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.labGetRequestAsync(centerId, userId, labRequestId);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "TechnicianOnly")]
+        [HttpPut("technician-collected-lab-request/{centerId}/{labRequestId}")]
+        public async Task<IActionResult> TechnicianCollectedLabRequestAsync(int centerId, int labRequestId)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.LabCollectSample(centerId, userId, labRequestId);
+            return Ok(result);
+        }
+
     }
 }
