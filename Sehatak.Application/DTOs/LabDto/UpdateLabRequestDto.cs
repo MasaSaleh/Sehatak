@@ -1,6 +1,4 @@
-﻿
-
-namespace Sehatak.Application.DTOs.LabDto
+﻿namespace Sehatak.Application.DTOs.LabDto
 {
     public class UpdateLabRequestDto
     {

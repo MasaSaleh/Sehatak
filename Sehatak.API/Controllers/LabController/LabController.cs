@@ -43,12 +43,30 @@ namespace Sehatak.API.Controllers.LabController
             return Ok(result);
         }
 
+        [Authorize(Policy = "DoctorOnly")]
+        [HttpGet("doctor-get-patient-lab-result/{centerId}")]
+        public async Task<IActionResult> DoctorGetLabResultAsync(int centerId, int patientId, [FromQuery] int labRequestId)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.DoctorGetLabResultsForPatient(centerId, userId, patientId, labRequestId);
+            return Ok(result);
+        }
+
         [Authorize(Policy = "PatientOnly")]
         [HttpGet("patient-get-lab-requests/{centerId}")]
         public async Task<IActionResult> PatientGetLabRequestsAsync(int centerId, [FromQuery] PagedRequest request, [FromQuery] int? subPatientId)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
             var result = await lab.PatientGetLabRequestAsync(centerId, userId, request, subPatientId);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "PatientOnly")]
+        [HttpGet("patient-get-lab-results/{centerId}")]
+        public async Task<IActionResult> PatientGetLabResultsAsync(int centerId, [FromQuery] PagedRequest request, [FromQuery] int? subPatientId)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.PatientGetLabResultAsync(centerId, userId, request, subPatientId);
             return Ok(result);
         }
 
@@ -106,5 +124,13 @@ namespace Sehatak.API.Controllers.LabController
             return Ok(result);
         }
 
+        [Authorize(Policy = "TechnicianOnly")]
+        [HttpPut("technician-uplod-lab-request/{centerId}")]
+        public async Task<IActionResult> TechnicianUplodLabRequestAsync(int centerId, [FromForm] UploadLabResultRequestDto request)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.LabUploadResult(centerId, userId,request);
+            return Ok(result);
+        }
     }
 }
