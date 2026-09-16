@@ -22,6 +22,7 @@ using Sehatak.Application.Interfaces.IFinancialReports;
 using Sehatak.Application.Interfaces.IFollowUp;
 using Sehatak.Application.Interfaces.ILab;
 using Sehatak.Application.Interfaces.IMedicalRecord;
+using Sehatak.Application.Interfaces.INotification;
 using Sehatak.Application.Interfaces.IPatientCenter;
 using Sehatak.Application.Interfaces.IProfileInterface;
 using Sehatak.Application.Interfaces.IProfileInterface.ProfileAdmin;
@@ -76,7 +77,7 @@ using Serilog;
 using System;
 using System.Text;
 using System.Threading.RateLimiting;
-
+using Sehatak.Infrastructure.Services.NotificationService;
 namespace Sehatak.API
 {
     public class Program
@@ -349,10 +350,11 @@ namespace Sehatak.API
             builder.Services.AddScoped<IEmerngency, EmergencyService>();
             builder.Services.AddScoped<IViewProfile, ViewProfileService>();
             builder.Services.AddScoped<ILab, LabService>();
+            builder.Services.AddScoped<INotification, NotificationService>();
 
             var app = builder.Build();
 
-            // MIDDLEWARE PIPELINE 
+            // MIDDLEWARE PIPELINE                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 
             app.UseMiddleware<ExceptionMiddleware>();
 
