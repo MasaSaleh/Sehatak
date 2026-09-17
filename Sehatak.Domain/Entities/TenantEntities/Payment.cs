@@ -19,6 +19,7 @@ namespace Sehatak.Domain.Entities.TenantEntities
         public int? AppointmentId { get; set; }
         public DateTime? ExpiresAt { get; set; }
         public string? ReferenceNumber { get; set; }
+        public int? LabRequestId { get; set; }
         public string? ReceiptImageUrl { get; set; }
         public string? Notes { get; set; }
 
@@ -27,6 +28,7 @@ namespace Sehatak.Domain.Entities.TenantEntities
         public Patient Patient { get; set; } = null!;
         public User? Staff { get; set; }
         public LabResult? LabResult { get; set; }
+        public LabRequest? LabRequest { get; set; }
         public Consultation? Consultation { get; set; }
 
     }

@@ -326,6 +326,12 @@ namespace Sehatak.Infrastructure.Data
                       .HasForeignKey<Payment>(e => e.LabResultId)
                       .OnDelete(DeleteBehavior.SetNull);
 
+                // LabRequest — One - to - One   ⬅ جديد
+                entity.HasOne(e => e.LabRequest)
+                      .WithOne(l => l.Payment)
+                      .HasForeignKey<Payment>(e => e.LabRequestId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
                 // Consultation — One-to-One
                 entity.HasOne(e => e.Consultation)
                       .WithOne(c => c.Payment)

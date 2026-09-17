@@ -11,5 +11,6 @@ namespace Sehatak.Application.DTOs.LabDto
         public decimal TotalPrice { get; set; }
         public string LabStatus { get; set; } = "Pending";
         public List<LabResultItemResponseDto>? LabItems { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -20,5 +20,6 @@ namespace Sehatak.Application.Interfaces.ILab
         Task<string> LabCollectSample(int centerId,int userId, int labRequestId);
         Task<LabUploadResultResponseDto> LabUploadResult(int centerId , int userId , UploadLabResultRequestDto request);
         Task<GetLabResultDto> DoctorGetLabResultsForPatient(int centerId, int userId, int patientId,int labRequestId);
+        Task<PagedResult<LabGetRequestResponseDto>> ReceptionistGetLabRequestsAwaitingPaymentAsync(int centerId, int userId, PagedRequest request);
     }
 }

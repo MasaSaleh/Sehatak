@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Sehatak.API.Controllers.ConfirmPaymentController;
 using Sehatak.API.Hubs;
 using Sehatak.API.Middleware;
 using Sehatak.Application.Interfaces.AddDoctorDailyHours;
@@ -14,6 +15,8 @@ using Sehatak.Application.Interfaces.DepartmentInterface;
 using Sehatak.Application.Interfaces.Features;
 using Sehatak.Application.Interfaces.GetSttafInterFace;
 using Sehatak.Application.Interfaces.IAuth;
+using Sehatak.Application.Interfaces.ICheckTime;
+using Sehatak.Application.Interfaces.IConfirmPayment;
 using Sehatak.Application.Interfaces.IDashBoard;
 using Sehatak.Application.Interfaces.IDoctorRating;
 using Sehatak.Application.Interfaces.IEmail;
@@ -45,6 +48,8 @@ using Sehatak.Infrastructure.Security;
 using Sehatak.Infrastructure.Services;
 using Sehatak.Infrastructure.Services.AddStaff;
 using Sehatak.Infrastructure.Services.AppointmentService;
+using Sehatak.Infrastructure.Services.CheckTimeService;
+using Sehatak.Infrastructure.Services.ConfirmPaymentService;
 using Sehatak.Infrastructure.Services.Consultationservice;
 using Sehatak.Infrastructure.Services.DashBoardService;
 using Sehatak.Infrastructure.Services.DepartmentService;
@@ -56,6 +61,7 @@ using Sehatak.Infrastructure.Services.FollowUpService;
 using Sehatak.Infrastructure.Services.GetStaff;
 using Sehatak.Infrastructure.Services.LabService;
 using Sehatak.Infrastructure.Services.MedicalRecordService;
+using Sehatak.Infrastructure.Services.NotificationService;
 using Sehatak.Infrastructure.Services.PatientService.PatientProfile;
 using Sehatak.Infrastructure.Services.PatientService.PatientRegisterAuth;
 using Sehatak.Infrastructure.Services.PtientCenterService;
@@ -77,7 +83,6 @@ using Serilog;
 using System;
 using System.Text;
 using System.Threading.RateLimiting;
-using Sehatak.Infrastructure.Services.NotificationService;
 namespace Sehatak.API
 {
     public class Program
@@ -351,6 +356,8 @@ namespace Sehatak.API
             builder.Services.AddScoped<IViewProfile, ViewProfileService>();
             builder.Services.AddScoped<ILab, LabService>();
             builder.Services.AddScoped<INotification, NotificationService>();
+            builder.Services.AddScoped<IConfirmPayment, ConfirmPaymentService>();
+            builder.Services.AddScoped<ICheckTime, CheckTimeService>();
 
             var app = builder.Build();
 

@@ -20,6 +20,7 @@ namespace Sehatak.Domain.Entities.TenantEntities
         public User RequestedByUser { get; set; } = null!;
         public Appointment? Appointment { get; set; }
         public LabResult? LabResult { get; set; }
+        public Payment? Payment { get; set; }
         public ICollection<LabRequestItem> Items { get; set; } = new List<LabRequestItem>();
 
 

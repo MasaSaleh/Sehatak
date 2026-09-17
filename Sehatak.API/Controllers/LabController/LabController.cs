@@ -88,6 +88,15 @@ namespace Sehatak.API.Controllers.LabController
             return Ok(result);
         }
 
+        [Authorize(Policy = "ReceptionistOnly")]
+        [HttpGet("receptionist-get-lab-requests-await-payment/{centerId}")]
+        public async Task<IActionResult> ReceptionistGetLabRequestsAwaitingPaymentAsync(int centerId, [FromQuery] PagedRequest request)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await lab.ReceptionistGetLabRequestsAwaitingPaymentAsync(centerId, userId, request);
+            return Ok(result);
+        }
+
         [Authorize(Policy = "LabRequest")]
         [HttpPut("receptionist-or-doctor-cancle-lab-requests/{centerId}/{labRequestId}")]
         public async Task<IActionResult> CancleLabRequestsAsync(int centerId,int labRequestId)
