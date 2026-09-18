@@ -20,11 +20,9 @@ namespace Sehatak.API.Controllers.SuperAdminAndAdmin.AddDoctorDaiktcontroller
 
         [Authorize(Policy = "AdminOnly")]
         [HttpPost("admin-add-doctor-hours/{centerId}/{doctorId}")]
-        public async Task<IActionResult> AddDoctorDailyHours(int centerId , int doctorId,
-            [FromBody] AddDoctorDailyHoursRequest request)
+        public async Task<IActionResult> AddDoctorDailyHours(int centerId , int doctorId,[FromBody] AddDoctorDailyHoursRequest request)
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await addHours.AddDoctorDailyHoursAsync(centerId,userId, doctorId,request);
             return Ok(result);
@@ -32,22 +30,19 @@ namespace Sehatak.API.Controllers.SuperAdminAndAdmin.AddDoctorDaiktcontroller
 
         [Authorize(Policy = "AdminOnly")]
         [HttpPost("admin-update-doctor-hours/{centerId}/{doctorId}")]
-        public async Task<IActionResult> UpdateDoctorDailyHours(int centerId, int doctorId,
-            [FromBody] UpdateDoctorDailyHousrRequest request)
+        public async Task<IActionResult> UpdateDoctorDailyHours(int centerId, int doctorId,[FromBody] UpdateDoctorDailyHousrRequest request)
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await addHours.UpdateDoctorDailyHoursAsync(centerId, userId, doctorId, request);
             return Ok(result);
         }
 
         [Authorize(Policy = "DoctorOnly")]
-        [HttpPost("doctor-Cancel-doctor-day/{centerId}")]
-        public async Task<IActionResult> CancelDoctorDay(int centerId, DateOnly date)
+        [HttpPut("doctor-Cancel-doctor-day/{centerId}")]
+        public async Task<IActionResult> CancelDoctorDay(int centerId,DateOnly date)
         {
-            var doctorId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var doctorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await addHours.CancleDailyHoursAsync(centerId, doctorId, date);
             return Ok(result);
@@ -61,14 +56,35 @@ namespace Sehatak.API.Controllers.SuperAdminAndAdmin.AddDoctorDaiktcontroller
             var result = await addHours.GetDoctorDailyHoursAsync(centerId, doctorId,request);
             return Ok(result);
         }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpGet("admin-get-block-doctors-day/{centerId}")]
+        public async Task<IActionResult> GetDoctorBlockDay(int centerId, [FromQuery] DateOnly date,[FromQuery] PagedRequest request)
+        {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var result = await addHours.GetDoctorsBlockDayAsync(centerId, userId,date, request);
+            return Ok(result);
+        }
+
         [Authorize(Policy = "DoctorOnly")]
-        [HttpPost("doctor-get-appointments-for-day{centerId}")]
-        public async Task<IActionResult> GetDoctorAppointmentsForDay(int centerId, [FromBody] DateOnly date)
+        [HttpGet("doctor-get-appointments-for-day{centerId}")]
+        public async Task<IActionResult> GetDoctorAppointmentsForDay(int centerId, [FromQuery] DateOnly date)
         {
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await addHours.GetDoctorAppointmentsForDayAsync(centerId, userId, date);
+            return Ok(result);
+        }
+
+
+        [Authorize(Policy = "DoctorOnly")]
+        [HttpGet("doctor-get-block-days{centerId}")]
+        public async Task<IActionResult> GetDoctorBlockDays(int centerId, [FromQuery] DateOnly date, [FromQuery]PagedRequest request)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var result = await addHours.DoctorGetBlokDays(centerId, userId, date,request);
             return Ok(result);
         }
     }

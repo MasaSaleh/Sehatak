@@ -1,7 +1,4 @@
 ﻿
-
-using Sehatak.Application.DTOs.MedicalRecordDto;
-
 namespace Sehatak.Application.DTOs.BillPaymentDto
 {
     public class ConsultationBillPaymentResponseDto

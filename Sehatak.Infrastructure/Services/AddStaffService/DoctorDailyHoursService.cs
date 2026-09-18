@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office2016.Excel;
+using Microsoft.EntityFrameworkCore;
 using Sehatak.Application.Common;
 using Sehatak.Application.DTOs.AddDoctorDailyHour;
 using Sehatak.Application.DTOs.AddDoctorDailyHourDto;
+using Sehatak.Application.DTOs.DoctorDailyHourDto;
 using Sehatak.Application.DTOs.DoctorDto;
 using Sehatak.Application.DTOs.Exceptions;
 using Sehatak.Application.Interfaces.AddDoctorDailyHours;
@@ -411,6 +413,69 @@ namespace Sehatak.Infrastructure.Services.AddStaff
             {
                 appointments = appointments
             };
+        }
+
+        public async Task<Application.Common.PagedResult<GetDoctorsBlockDaysResponseDto>> GetDoctorsBlockDayAsync(int centerId, int userId, DateOnly date, PagedRequest request)
+        {
+            var center = await sharedDbContext.MedicalCenters
+                .FirstOrDefaultAsync(c => c.Id == centerId && c.CenterStatus == CenterStatus.Active);
+            if (center == null)
+                throw new BusinessException("Center.NotFound");
+
+            using var db = contextFactory.CreateForCenter(centerId);
+
+            var user = await db.Users
+                .FirstOrDefaultAsync(u => u.Id == userId
+                                     && u.isActive);
+
+            if (user == null)
+                throw new BusinessException("User.NotFound");
+
+            var query = db.DoctorBlockedDays
+                .Include(d=>d.Doctor)
+                .Where(d => d.date == date)
+                .OrderByDescending(d => d.CreatedAt)
+                .Select(n => new GetDoctorsBlockDaysResponseDto
+                {
+                    Id = n.Id,
+                    DoctorId = n.doctorId,
+                    DoctorName = $"{n.Doctor.user.firstName} {n.Doctor.user.lastName}",
+                    date = date,
+                    TimeSlot = n.timeSlot
+                });
+            return await query.ToPagedResultAsync(request.PageNumber, request.PageSize);
+        }
+
+        public async Task<Application.Common.PagedResult<GetDoctorsBlockDaysResponseDto>> DoctorGetBlokDays(int centerId, int userId, DateOnly date, PagedRequest request)
+        {
+            var center = await sharedDbContext.MedicalCenters
+                .FirstOrDefaultAsync(c => c.Id == centerId && c.CenterStatus == CenterStatus.Active);
+            if (center == null)
+                throw new BusinessException("Center.NotFound");
+
+            using var db = contextFactory.CreateForCenter(centerId);
+
+            var doctor = await db.Doctors
+                .Include(u=>u.user)
+                .FirstOrDefaultAsync(u => u.userId == userId
+                                     && u.user.isActive);
+
+            if (doctor == null)
+                throw new BusinessException("User.NotFound");
+
+            var query = db.DoctorBlockedDays
+                .Where(d => d.date == date
+                       && d.doctorId == doctor.Id)
+                .OrderByDescending(d => d.CreatedAt)
+                .Select(n => new GetDoctorsBlockDaysResponseDto
+                {
+                    Id = n.Id,
+                    DoctorId = n.doctorId,
+                    DoctorName = $"{doctor.user.firstName} {doctor.user.lastName}",
+                    date = date,
+                    TimeSlot = n.timeSlot
+                });
+            return await query.ToPagedResultAsync(request.PageNumber, request.PageSize);
         }
 
         //private async Task NotifyPatientPostponeAsync(User user)
