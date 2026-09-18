@@ -17,7 +17,7 @@ namespace Sehatak.API.Controllers.SuperAdminController.Centers
         }
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpPost("CreateCenter")]
+        [HttpPost("superAdmin-create-center")]
         public async Task<IActionResult> CreateCenter([FromForm]createCenterRequestDto request)
         {
             var result = await centerService.CreateCenterAsync(request);

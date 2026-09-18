@@ -25,7 +25,7 @@ namespace Sehatak.API.Controllers.AdminController.AddStaffController
             return Ok(result);
         }
         [Authorize(Policy = "AdminOrAbove")]
-        [HttpPost("admin-remove-staff-from-center/{centerId}")]
+        [HttpPut("admin-remove-staff-from-center/{centerId}")]
         public async Task<IActionResult> RmeoveStaff(int centerId, [FromBody] RemoveStaffRequestDto request)
         {
             var result = await signup.RemoveStaffAsync(centerId, request);
@@ -33,7 +33,7 @@ namespace Sehatak.API.Controllers.AdminController.AddStaffController
         }
 
         [Authorize(Policy = "AdminOrAbove")]
-        [HttpPost("admin-active-staff-from-center/{centerId}")]
+        [HttpPut("admin-active-staff-from-center/{centerId}")]
         public async Task<IActionResult> ActiveStaff(int centerId, [FromBody] RemoveStaffRequestDto request)
         {
             var result = await signup.ActiveStaffAsync(centerId, request);

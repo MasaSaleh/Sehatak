@@ -34,7 +34,7 @@ namespace Sehatak.API.Controllers.CenterRegistration
         }
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpGet("superAdmin-pending-payments")]
+        [HttpGet("superAdmin-get-pending-payments")]
         public async Task<IActionResult> GetPendingRegistrationPayments([FromQuery] PagedRequest request)
         {
             var result = await _registrationService.GetPendingRegistrationPaymentsAsync(request);
@@ -43,7 +43,7 @@ namespace Sehatak.API.Controllers.CenterRegistration
 
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpPost("superAdmin-payments/{paymentId}/confirm")]
+        [HttpPost("superAdmin-confirm-payments/{paymentId}")]
         public async Task<IActionResult> ConfirmRegistrationPayment(int paymentId)
         {
             var superAdminId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
@@ -53,7 +53,7 @@ namespace Sehatak.API.Controllers.CenterRegistration
 
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpGet("superAdmin-requests")]
+        [HttpGet("superAdmin-get-requests")]
         public async Task<IActionResult> GetCentersRegisteration([FromQuery] PagedRequest request)
         {
             var result = await _registrationService.GetCentersRegisterationAsync(request);
@@ -62,7 +62,7 @@ namespace Sehatak.API.Controllers.CenterRegistration
 
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpGet("superAdmin-requests/{requestId}")]
+        [HttpGet("superAdmin-get-request/{requestId}")]
         public async Task<IActionResult> GetCenterRegistration(int requestId)
         {
             var result = await _registrationService.GetCenterRegistrationAsync(requestId);
@@ -70,7 +70,7 @@ namespace Sehatak.API.Controllers.CenterRegistration
         }
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpPost("superAdmin-requests/{requestId}/approve")]
+        [HttpPost("superAdmin-approve-requests/{requestId}")]
         public async Task<IActionResult> ApproveCenterRequest(int requestId)
         {
             var superAdminId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
@@ -79,7 +79,7 @@ namespace Sehatak.API.Controllers.CenterRegistration
         }
 
         [Authorize(Policy = "SuperAdminOnly")]
-        [HttpPost("superAdmin-requests/{requestId}/reject")]
+        [HttpPost("superAdmin-reject-requests/{requestId}")]
         public async Task<IActionResult> RejectRequest(int requestId, [FromBody] string rejectionReason)
         {
             var superAdminId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);

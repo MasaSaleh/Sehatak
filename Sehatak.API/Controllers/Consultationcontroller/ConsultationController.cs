@@ -47,7 +47,7 @@ namespace Sehatak.API.Controllers.Consultationcontroller
         }
 
         [Authorize(Policy = "PatientOnly")]
-        [HttpGet("patient-get-consultation/{centerId}")]
+        [HttpGet("patient-get-consultations/{centerId}")]
         public async Task<IActionResult> GetConsultations(int centerId, [FromQuery] ConsultationStatus status, [FromQuery] PagedRequest request,int? subPatientId)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

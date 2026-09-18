@@ -16,13 +16,13 @@ namespace Sehatak.API.Controllers.SuperAdminController.AuthSuperAdmin
             this.superAdminAuthService = superAdminAuthService;
         }
         [AllowAnonymous]
-        [HttpPost("Register_SuperAdmin")]
+        [HttpPost("superAdmin-register")]
         public async Task<IActionResult> RegisterSuperAdmin([FromForm]RegisterSuperAdminRequestDto superAdminDto)
         {
             var result = await superAdminAuthService.RegisterAsync(superAdminDto);
             return Ok(result);
         }
-        [HttpPost("SuperAdmin_Login")]
+        [HttpPost("superAdmin_login")]
         public async Task<IActionResult> SuperAdminLogin(SuperAdminLoginRequestDto superAdminDto)
         {
             var result = await superAdminAuthService.LoginAsync(superAdminDto);

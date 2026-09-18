@@ -30,7 +30,7 @@ namespace Sehatak.API.Controllers.SuperAdminAndAdmin.ServicePricecontroller
         }
 
         [Authorize(Policy = "AdminOnly")]
-        [HttpPost("admin-update-service-price/{centerId}")]
+        [HttpPut("admin-update-service-price/{centerId}")]
         public async Task<IActionResult> UpdateSrevicePrice(int centerId,[FromForm] UpdateServicePrice request)
         {
             var userId = int.Parse(
@@ -40,7 +40,7 @@ namespace Sehatak.API.Controllers.SuperAdminAndAdmin.ServicePricecontroller
         }
 
         [Authorize(Policy = "AdminOnly")]
-        [HttpPost("admin-remove-service-price/{centerId}/{servicePriceId}")]
+        [HttpPut("admin-remove-service-price/{centerId}/{servicePriceId}")]
         public async Task<IActionResult> RemoveSrevicePrice(int centerId, int servicePriceId)
         {
             var userId = int.Parse(
