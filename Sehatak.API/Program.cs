@@ -15,6 +15,7 @@ using Sehatak.Application.Interfaces.DepartmentInterface;
 using Sehatak.Application.Interfaces.Features;
 using Sehatak.Application.Interfaces.GetSttafInterFace;
 using Sehatak.Application.Interfaces.IAuth;
+using Sehatak.Application.Interfaces.IBillPayment;
 using Sehatak.Application.Interfaces.ICheckTime;
 using Sehatak.Application.Interfaces.IConfirmPayment;
 using Sehatak.Application.Interfaces.IDashBoard;
@@ -48,6 +49,7 @@ using Sehatak.Infrastructure.Security;
 using Sehatak.Infrastructure.Services;
 using Sehatak.Infrastructure.Services.AddStaff;
 using Sehatak.Infrastructure.Services.AppointmentService;
+using Sehatak.Infrastructure.Services.BillPaymentService;
 using Sehatak.Infrastructure.Services.CheckTimeService;
 using Sehatak.Infrastructure.Services.ConfirmPaymentService;
 using Sehatak.Infrastructure.Services.Consultationservice;
@@ -358,6 +360,7 @@ namespace Sehatak.API
             builder.Services.AddScoped<INotification, NotificationService>();
             builder.Services.AddScoped<IConfirmPayment, ConfirmPaymentService>();
             builder.Services.AddScoped<ICheckTime, CheckTimeService>();
+            builder.Services.AddScoped<IBillPayment, BillPaymentService>();
 
             var app = builder.Build();
 

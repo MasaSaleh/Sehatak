@@ -340,6 +340,7 @@ namespace Sehatak.Infrastructure.Services.MedicalRecordService
                         {
                             Id = servicePrice.Id,
                             ServiceName = servicePrice.ServiceName,
+                            ServicePriceId = servicePrice.Id,
                             UnitPrice = servicePrice.Price,
                             Quantity = item.Quantity,
                             TotalPrice = itemTotal
@@ -458,6 +459,7 @@ namespace Sehatak.Infrastructure.Services.MedicalRecordService
                         {
                             Id = i.Id,
                             ServiceName = i.ServicePrice.ServiceName,
+                            ServicePriceId = i.ServicePriceId,
                             Quantity = i.Quantity,
                             UnitPrice = i.UnitPrice,
                             TotalPrice = i.TotalPrice
@@ -519,6 +521,7 @@ namespace Sehatak.Infrastructure.Services.MedicalRecordService
                 {
                     Id = i.Id,
                     ServiceName = i.ServicePrice.ServiceName,
+                    ServicePriceId = i.ServicePriceId,
                     Quantity = i.Quantity,
                     UnitPrice = i.UnitPrice,
                     TotalPrice = i.TotalPrice

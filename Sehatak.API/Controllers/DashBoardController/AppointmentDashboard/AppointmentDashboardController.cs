@@ -11,10 +11,10 @@ namespace Sehatak.API.Controllers.DashBoard.AppointmentDashboard
 {
     [ApiController]
     [Route("[Controller]")]
-    public class AppointmentController : ControllerBase
+    public class AppointmentDashboardController : ControllerBase
     {
         private readonly IApointmentDashBoard dash;
-        public AppointmentController(IApointmentDashBoard dash)
+        public AppointmentDashboardController(IApointmentDashBoard dash)
         {
             this.dash = dash;
         }
