@@ -24,11 +24,11 @@ namespace Sehatak.API.Controllers.ConfirmPaymentController
         }
 
         [Authorize(Policy = "ReceptionistOnly")]
-        [HttpPost("receptionist-appointment-paid/{centerId}/{labRequestId}")]
-        public async Task<IActionResult> AppointmentAsync(int centerId, int labRequestId, [FromBody] CollectPaymentRequestDto request)
+        [HttpPost("receptionist-appointment-paid/{centerId}/{appointmentId}")]
+        public async Task<IActionResult> AppointmentAsync(int centerId, int appointmentId, [FromBody] CollectPaymentRequestDto request)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-            var result = await payment.ReceptionistCollectAppointmentPaymentAsync(centerId, userId, labRequestId, request);
+            var result = await payment.ReceptionistCollectAppointmentPaymentAsync(centerId, userId, appointmentId, request);
             return Ok(result);
         }
     }
