@@ -53,7 +53,7 @@ namespace Sehatak.Infrastructure.Services.ConfirmPaymentService
             if (appointment == null)
                 throw new BusinessException("Appointment.NotFound");
 
-            if (appointment.CheckInTime == null)
+            if (appointment.actualStartTime == null)
                 throw new BusinessException("Appointment.NotCheckedInYet");
 
             if (appointment.CheckOutTime != null)
